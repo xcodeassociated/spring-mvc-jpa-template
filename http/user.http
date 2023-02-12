@@ -1,0 +1,47 @@
+###
+
+GET http://localhost:8082/permissions?page=0&size=10&sort=id&direction=DESC
+
+###
+
+POST http://localhost:8082/permissions
+Content-Type: application/json
+
+{
+"name": "ROLE_ADMIN",
+"description": "Admin Role"
+}
+
+###
+
+GET http://localhost:8082/permissions/1
+
+###
+
+PUT http://localhost:8082/permissions/1
+Content-Type: application/json
+
+{
+"name": "ROLE_ADMIN",
+"description": "Admin Role changed: {{$uuid}}",
+"version": 0
+}
+
+###
+
+PUT http://localhost:8082/permissions/1/jpql
+Content-Type: application/json
+
+{
+"name": "ROLE_ADMIN",
+"description": "Admin Role changed: {{$uuid}}",
+"version": 0
+}
+
+###
+
+DELETE http://localhost:8082/permissions/1
+
+###
+
+GET http://localhost:8082/error?message=foo
