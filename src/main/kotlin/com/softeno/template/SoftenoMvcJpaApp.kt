@@ -304,9 +304,9 @@ class AuditConfiguration {
 @EnableJpaAuditing
 @EnableTransactionManagement
 @SpringBootApplication
-class TemplateApplication
+class SoftenoMvcJpaApp
 
 fun main(args: Array<String>) {
-	runApplication<TemplateApplication>(*args)
+	runApplication<SoftenoMvcJpaApp>(*args)
 }
 

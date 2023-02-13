@@ -9,7 +9,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 @Testcontainers
-@SpringBootTest(classes = TemplateApplication,
+@SpringBootTest(classes = SoftenoMvcJpaApp,
         properties = "spring.profiles.active=integration",
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableConfigurationProperties
