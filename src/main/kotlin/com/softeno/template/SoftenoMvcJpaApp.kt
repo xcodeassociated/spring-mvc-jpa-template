@@ -6,8 +6,12 @@ import jakarta.transaction.Transactional
 import org.apache.commons.logging.LogFactory
 import org.hibernate.annotations.OptimisticLockType
 import org.hibernate.annotations.OptimisticLocking
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -27,6 +31,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.data.querydsl.QuerydslPredicateExecutor
 import org.springframework.data.repository.query.Param
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
@@ -34,6 +39,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.client.*
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.web.SecurityFilterChain
@@ -45,7 +53,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
-
+import org.springframework.web.reactive.function.client.WebClient
 import java.time.Instant
 import java.util.*
 
@@ -216,7 +224,7 @@ class PermissionService(
 
 @RestController
 @RequestMapping("")
-class PermissionController(private val permissionService: PermissionService) {
+class PermissionController(private val permissionService: PermissionService, @Qualifier(value = "external") private val webClient: WebClient) {
 
 	@GetMapping("/permissions")
 	fun getPermissions(@RequestParam(required = false, defaultValue = "0") page: Int,
@@ -260,6 +268,13 @@ class PermissionController(private val permissionService: PermissionService) {
 	@GetMapping("/error")
 	fun error(@RequestParam(required = false, defaultValue = "generic error") message: String) {
 		throw RuntimeException(message)
+	}
+
+	// todo: move to new controller
+	@GetMapping("/external/{id}")
+	fun getExternalResource(@PathVariable id: String): ResponseEntity<String> {
+		val data = webClient.get().uri("/${id}").accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String::class.java).block()
+		return ResponseEntity.ok(data)
 	}
 
 }
@@ -387,7 +402,7 @@ class SecurityConfig {
 					"/swagger-resources/**",
 					"/swagger-ui/**",
 					"/v3/api-docs/**").permitAll()
-				it.requestMatchers("/permissions/**").hasAuthority("ROLE_ADMIN")
+				it.requestMatchers("/permissions/**", "/external/**", "/error/**").hasAuthority("ROLE_ADMIN")
 			}
 			.oauth2ResourceServer {
 				it.jwt().decoder(jwtDecoder(issuer, jwkSetUri))
@@ -399,9 +414,41 @@ class SecurityConfig {
 	}
 }
 
+@ConfigurationProperties(prefix = "com.softeno.external")
+data class ExternalClientConfig(val url: String = "", val name: String = "")
+
+@Profile(value = ["!integration"])
+@Configuration
+class WebClientConfig {
+
+	@Bean
+	fun authorizedClientManager(clients: ClientRegistrationRepository, service: OAuth2AuthorizedClientService): OAuth2AuthorizedClientManager {
+		val manager = AuthorizedClientServiceOAuth2AuthorizedClientManager(clients, service)
+		val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
+			.clientCredentials()
+			.build()
+		manager.setAuthorizedClientProvider(authorizedClientProvider)
+		return manager
+	}
+
+	@Bean(value = ["external"])
+	fun webClient(authorizedClientManager: OAuth2AuthorizedClientManager, config: ExternalClientConfig): WebClient {
+		val oauth2 = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
+		oauth2.setDefaultClientRegistrationId("keycloak")
+		return WebClient.builder()
+			.filter(oauth2)
+			.baseUrl(config.url)
+			.build()
+	}
+
+}
+
+
 @EnableJpaRepositories
 @EnableJpaAuditing
 @EnableTransactionManagement
+@EnableConfigurationProperties
+@ConfigurationPropertiesScan("com.softeno")
 @SpringBootApplication
 class SoftenoMvcJpaApp
 

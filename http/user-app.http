@@ -12,7 +12,7 @@ Authorization: Bearer {{oauthToken}}
 {"name": "test-{{$random.integer(0, 100)}}", "description": "test description coroutine"}
 
 > {%
-client.global.set("permissionId", response.body._id)
+client.global.set("permissionId", response.body.id)
  %}
 
 ###
@@ -24,7 +24,14 @@ PUT {{host}}/permissions/{{permissionId}}
 Content-Type: application/json
 Authorization: Bearer {{oauthToken}}
 
-{"name": "test-coroutine-changed", "description": "test description coroutine changed!"}
+{"name": "test-coroutine-changed", "description": "test description coroutine changed!", "version": 0}
+
+###
+PUT {{host}}/permissions/{{permissionId}}/jpql
+Content-Type: application/json
+Authorization: Bearer {{oauthToken}}
+
+{"name": "test-coroutine-changed", "description": "test description coroutine changed via jpql!", "version": 0}
 
 ###
 DELETE {{host}}/permissions/{{permissionId}}
@@ -34,39 +41,12 @@ Authorization: Bearer {{oauthToken}}
 client.global.set("permissionId", null)
  %}
 
-### User
+### todo: move
 
 ###
-GET {{host}}/users?page=0&size=10&sort=id&direction=ASC
+GET {{host}}/external/{{$random.integer(0, 1000)}}
 Authorization: Bearer {{oauthToken}}
 
 ###
-POST {{host}}/users
-Content-Type: application/json
+GET {{host}}/error?message=foo
 Authorization: Bearer {{oauthToken}}
-
-{"name": "user: {{$uuid}}", "email":  "{{$random.email}}", "role": ["{{permissionId}}"]}
-
-> {%
-    client.global.set("userId", response.body._id)
-%}
-
-###
-PUT {{host}}/users/{{userId}}
-Content-Type: application/json
-Authorization: Bearer {{oauthToken}}
-
-{"name": "user changed: {{$uuid}}", "email":  "{{$random.email}}", "role": ["{{permissionId}}"]}
-
-###
-GET {{host}}/users/{{userId}}
-Authorization: Bearer {{oauthToken}}
-
-###
-DELETE {{host}}/users/{{userId}}
-Authorization: Bearer {{oauthToken}}
-
-> {%
-    client.global.set("userId", null)
-%}
-
