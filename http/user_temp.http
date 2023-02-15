@@ -1,0 +1,49 @@
+###
+
+GET http://localhost:8082/permissions?page=0&size=10&sort=id&direction=DESC
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJuLWVBd1pCaWhJSm9adlhvVWh2REZxN2RraWZDcTF2MkNBblNodklTcW1vIn0.eyJleHAiOjE2NzY1NjI0MDksImlhdCI6MTY3NjQ3NjAwOSwianRpIjoiMzMxMmM2MDgtMGRjOS00ZWRkLThkNmEtMjIzN2Q4YTUwNGRhIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDkwL3JlYWxtcy9tYXN0ZXIiLCJhdWQiOlsibWFzdGVyLXJlYWxtIiwiYWNjb3VudCJdLCJzdWIiOiIwMTExZTU2ZC1jMmVmLTRkMWMtYjA0My0xZDMyZTViZjYzYWIiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJmcm9udGVuZCIsInNlc3Npb25fc3RhdGUiOiI2MTE5MGNiOS03Y2FhLTQ0ZGMtOTQxZC02ZGM5OWMxZGUzYWIiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImNyZWF0ZS1yZWFsbSIsImRlZmF1bHQtcm9sZXMtbWFzdGVyIiwib2ZmbGluZV9hY2Nlc3MiLCJhZG1pbiIsIlJPTEVfQURNSU4iLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7Im1hc3Rlci1yZWFsbSI6eyJyb2xlcyI6WyJ2aWV3LWlkZW50aXR5LXByb3ZpZGVycyIsInZpZXctcmVhbG0iLCJtYW5hZ2UtaWRlbnRpdHktcHJvdmlkZXJzIiwiaW1wZXJzb25hdGlvbiIsImNyZWF0ZS1jbGllbnQiLCJtYW5hZ2UtdXNlcnMiLCJxdWVyeS1yZWFsbXMiLCJ2aWV3LWF1dGhvcml6YXRpb24iLCJxdWVyeS1jbGllbnRzIiwicXVlcnktdXNlcnMiLCJtYW5hZ2UtZXZlbnRzIiwibWFuYWdlLXJlYWxtIiwidmlldy1ldmVudHMiLCJ2aWV3LXVzZXJzIiwidmlldy1jbGllbnRzIiwibWFuYWdlLWF1dGhvcml6YXRpb24iLCJtYW5hZ2UtY2xpZW50cyIsInF1ZXJ5LWdyb3VwcyJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2lkIjoiNjExOTBjYjktN2NhYS00NGRjLTk0MWQtNmRjOTljMWRlM2FiIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJhZG1pbiBhZG1pbiIsInByZWZlcnJlZF91c2VybmFtZSI6ImFkbWluIiwiZ2l2ZW5fbmFtZSI6ImFkbWluIiwiZmFtaWx5X25hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AZW1haWwuY29tIn0.PfKGfcPMDkyK90CBOuxDSYhtLIbkec2fQTWVp9yZ_5gjvQsoM26SGaeTSGjHRPIIDKVDpQZqmYGPK2Jp4wgqV4ho5WGOuSuKR3p-vdE9d47w5uO-Xr42DlBjHXgWefWG6gN1zrsWkPtAi3ZDzNz2XREX8s7yLZzvnbyIwbKTCTuKyUm4VLUKbrFWwXAJ1bidXOIbB-b_r5zFV03QiEW94zogMYolJIBnZTg14RgiKikNM5XzVbnInIjXdTUuwTBE31VmJgObrWue9CewmtU7KHaaTnPar9nMI69itYhkYRkLPPOr4eCohnXWO3Ij3Y4IpP_Inm3uZ_Ah7wcfSZihyg
+
+
+###
+
+POST http://localhost:8082/permissions
+Content-Type: application/json
+
+{
+"name": "ROLE_ADMIN",
+"description": "Admin Role"
+}
+
+###
+
+GET http://localhost:8082/permissions/1
+
+###
+
+PUT http://localhost:8082/permissions/1
+Content-Type: application/json
+
+{
+"name": "ROLE_ADMIN",
+"description": "Admin Role changed: {{$uuid}}",
+"version": 0
+}
+
+###
+
+PUT http://localhost:8082/permissions/1/jpql
+Content-Type: application/json
+
+{
+"name": "ROLE_ADMIN",
+"description": "Admin Role changed: {{$uuid}}",
+"version": 0
+}
+
+###
+
+DELETE http://localhost:8082/permissions/1
+
+###
+
+GET http://localhost:8082/error?message=foo

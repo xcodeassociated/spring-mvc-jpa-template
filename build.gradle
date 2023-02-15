@@ -56,6 +56,12 @@ dependencies {
 	// guerydsl
 	implementation 'com.querydsl:querydsl-jpa:5.0.0'
 	kapt group: 'com.querydsl', name: 'querydsl-apt', version: '5.0.0', classifier: 'jakarta'
+
+	// spring security
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation 'org.springframework.security:spring-security-test'
+
 }
 
 dependencyManagement {
