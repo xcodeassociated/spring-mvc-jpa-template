@@ -39,6 +39,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.*
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
@@ -315,16 +316,26 @@ enum class ErrorType(val code: Int) {
 
 data class ErrorDetails(val timestamp: Instant, val errorType: ErrorType, val errorCode: Int, val message: String?, val request: String?)
 
-// todo: get from security context
 class AuditorAwareImpl : AuditorAware<String> {
+	private val log = LogFactory.getLog(javaClass)
+
 	override fun getCurrentAuditor(): Optional<String> {
-		return Optional.of("system")
+		val authentication = SecurityContextHolder.getContext().authentication
+		if (authentication == null || !authentication.isAuthenticated) {
+			return Optional.of("system")
+		}
+
+		val principal = (authentication.principal as Jwt).claims["sub"] as String
+		log.debug("[auditor] authentication principal: $principal")
+
+		return Optional.of(principal)
 	}
 }
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 class AuditConfiguration {
+
 	@Bean
 	fun auditorProvider(): AuditorAware<String> {
 		return AuditorAwareImpl()
@@ -445,7 +456,6 @@ class WebClientConfig {
 
 
 @EnableJpaRepositories
-@EnableJpaAuditing
 @EnableTransactionManagement
 @EnableConfigurationProperties
 @ConfigurationPropertiesScan("com.softeno")
