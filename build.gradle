@@ -7,6 +7,7 @@ plugins {
 	id 'org.jetbrains.kotlin.plugin.spring' version '1.8.0'
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.8.0'
 	id "org.jetbrains.kotlin.kapt" version "1.8.0"
+	id "org.liquibase.gradle" version "2.1.1"
 	id 'groovy'
 }
 
@@ -58,6 +59,21 @@ dependencies {
 	implementation 'com.querydsl:querydsl-jpa:5.0.0'
 	kapt group: 'com.querydsl', name: 'querydsl-apt', version: '5.0.0', classifier: 'jakarta'
 
+	// liquibase
+	implementation ('org.liquibase:liquibase-core:4.19.1') {
+		exclude group: 'javax.xml.bind', module: 'jaxb-api'
+		exclude group: 'org.liquibase.ext', module: 'liquibase-hibernate5'
+	}
+	liquibaseRuntime 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+	liquibaseRuntime 'org.jetbrains.kotlin:kotlin-reflect'
+	liquibaseRuntime 'org.liquibase.ext:liquibase-hibernate6:4.19.1'
+	liquibaseRuntime 'org.postgresql:postgresql:42.5.4'
+	liquibaseRuntime 'ch.qos.logback:logback-core:1.4.5'
+	liquibaseRuntime 'ch.qos.logback:logback-classic:1.4.5'
+	liquibaseRuntime 'info.picocli:picocli:4.7.1'
+	liquibaseRuntime "org.springframework.boot:spring-boot-starter-data-jpa:3.0.2"
+	liquibaseRuntime sourceSets.main.output
+
 	// spring security
 	implementation 'org.springframework.boot:spring-boot-starter-webflux' // webclient dependency
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
@@ -69,6 +85,19 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-common:2.0.2'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 
+}
+liquibase {
+	activities {
+		main {
+			changeLogFile "$projectDir/src/main/resources/db/changesets/changelog.yml"
+			url "jdbc:postgresql://localhost:5432/application"
+			username "admin"
+			password "admin"
+			driver 'org.postgresql.Driver'
+			referenceUrl 'hibernate:spring:com.softeno.template?dialect=org.hibernate.dialect.PostgreSQL95Dialect&hibernate.use_jdbc_metadata_defaults=true&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy'
+			referenceDriver 'liquibase.ext.hibernate.database.connection.HibernateDriver'
+		}
+	}
 }
 
 dependencyManagement {

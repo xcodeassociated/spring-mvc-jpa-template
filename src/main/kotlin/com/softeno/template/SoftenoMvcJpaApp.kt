@@ -112,7 +112,7 @@ class Permission(uuid: UUID = UUID.randomUUID()) : BaseEntity(uuid) {
 	@Column(unique = true, nullable = false)
 	var name: String? = null
 
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition = "TEXT")
 	var description: String? = null
 }
 

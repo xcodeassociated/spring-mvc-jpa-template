@@ -10,10 +10,25 @@
             </Pattern>
         </layout>
     </appender>
-
+<!--    root-->
     <root level="info">
         <appender-ref ref="Console" />
     </root>
+<!--    hibernate-->
+    <logger name="org.hibernate" level="trace" additivity="false" >
+        <appender-ref ref="Console" />
+    </logger>
+    <logger name="org.hibernate.type" level="all" additivity="false" >
+        <appender-ref ref="Console" />
+    </logger>
+    <logger name="org.hibernate.SQL" level="all" additivity="false" >
+        <appender-ref ref="Console" />
+    </logger>
+<!--    jdbc-->
+    <logger name="org.springframework.jdbc" level="trace" additivity="false" >
+        <appender-ref ref="Console" />
+    </logger>
+<!--    application-->
     <logger name="com.softeno" level="trace" additivity="false">
         <appender-ref ref="Console" />
     </logger>

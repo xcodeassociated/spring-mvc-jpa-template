@@ -1,0 +1,65 @@
+databaseChangeLog:
+- changeSet:
+    id: 1677951974555-1
+    author: xcodeassociated (generated)
+    changes:
+    - createSequence:
+        incrementBy: 50
+        sequenceName: permissions_seq
+        startValue: 1
+- changeSet:
+    id: 1677951974555-2
+    author: xcodeassociated (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: permissionsPK
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: created_by
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: created_date
+            type: BIGINT
+        - column:
+            name: modified_by
+            type: VARCHAR(255)
+        - column:
+            name: modified_date
+            type: BIGINT
+        - column:
+            name: uuid
+            type: UUID
+        - column:
+            name: version
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: description
+            type: TEXT
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(255)
+        tableName: permissions
+- changeSet:
+    id: 1677951974555-3
+    author: xcodeassociated (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: name
+        constraintName: UC_PERMISSIONSNAME_COL
+        tableName: permissions
+
