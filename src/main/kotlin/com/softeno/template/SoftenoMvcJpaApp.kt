@@ -325,10 +325,16 @@ class AuditorAwareImpl : AuditorAware<String> {
 			return Optional.of("system")
 		}
 
-		val principal = (authentication.principal as Jwt).claims["sub"] as String
-		log.debug("[auditor] authentication principal: $principal")
+		return when (authentication.principal) {
+			is String -> Optional.of(authentication.principal as String)
+			is Jwt -> {
+				val principal = (authentication.principal as Jwt).claims["sub"] as String
+				log.debug("[auditor] authentication principal: $principal")
 
-		return Optional.of(principal)
+				Optional.of(principal)
+			}
+			else -> Optional.of("system")
+		}
 	}
 }
 
