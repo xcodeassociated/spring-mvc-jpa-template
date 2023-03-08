@@ -8,6 +8,7 @@ plugins {
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.8.0'
 	id "org.jetbrains.kotlin.kapt" version "1.8.0"
 	id "org.liquibase.gradle" version "2.1.1"
+	id "com.google.osdetector" version "1.7.2"
 	id 'groovy'
 }
 
@@ -84,6 +85,14 @@ dependencies {
 	// kafka
 	implementation 'org.springframework.kafka:spring-kafka'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+	// circuit breaker
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.0.0'
+
+	// macOs ARM only
+	if (osdetector.classifier == "osx-aarch_64") {
+		runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.87.Final:${osdetector.classifier}")
+	}
 
 	// springdoc
 	implementation 'org.springdoc:springdoc-openapi-starter-common:2.0.2'

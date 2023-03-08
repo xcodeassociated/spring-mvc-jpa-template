@@ -3,6 +3,7 @@ package com.softeno.template
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import org.apache.commons.logging.LogFactory
@@ -244,8 +245,8 @@ class PermissionService(
 @RequestMapping("")
 class PermissionController(
 	private val permissionService: PermissionService,
-	@Qualifier(value = "external") private val webClient: WebClient,
-	private val applicationEventPublisher: ApplicationEventPublisher
+	private val applicationEventPublisher: ApplicationEventPublisher,
+	private val externalServiceClient: ExternalServiceClient
 ) {
 	private val log = LogFactory.getLog(javaClass)
 
@@ -298,8 +299,28 @@ class PermissionController(
 	// todo: move to new controller
 	@GetMapping("/external/{id}")
 	fun getExternalResource(@PathVariable id: String): ResponseEntity<String> {
-		val data = webClient.get().uri("/${id}").accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String::class.java).block()
+		val data = externalServiceClient.fetchExternalResource(id)
 		return ResponseEntity.ok(data)
+	}
+
+}
+
+@Component
+class ExternalServiceClient(@Qualifier(value = "external") private val webClient: WebClient) {
+	private val log = LogFactory.getLog(javaClass)
+
+	@CircuitBreaker(name = "fallbackExample", fallbackMethod = "localCacheFallback")
+	fun fetchExternalResource(id: String): String? {
+		return webClient.get().uri("/${id}")
+			.accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.bodyToMono(String::class.java)
+			.block()
+	}
+
+	private fun localCacheFallback(id: String, e: Throwable): String? {
+		log.error("fallback: $id, $e")
+		return "fallback"
 	}
 
 }
