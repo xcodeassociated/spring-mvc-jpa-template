@@ -1,9 +1,15 @@
 package com.softeno.template
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.databind.JsonNode
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
 import org.apache.commons.logging.LogFactory
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
 import org.hibernate.annotations.OptimisticLockType
 import org.hibernate.annotations.OptimisticLocking
 import org.springframework.beans.factory.annotation.Qualifier
@@ -13,6 +19,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
+import org.springframework.context.ApplicationEvent
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -33,6 +42,12 @@ import org.springframework.data.repository.query.Param
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.kafka.annotation.EnableKafka
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
+import org.springframework.kafka.core.*
+import org.springframework.kafka.support.serializer.JsonDeserializer
+import org.springframework.kafka.support.serializer.JsonSerializer
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -46,6 +61,8 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.stereotype.Component
+import org.springframework.stereotype.Controller
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.EnableTransactionManagement
@@ -225,7 +242,12 @@ class PermissionService(
 
 @RestController
 @RequestMapping("")
-class PermissionController(private val permissionService: PermissionService, @Qualifier(value = "external") private val webClient: WebClient) {
+class PermissionController(
+	private val permissionService: PermissionService,
+	@Qualifier(value = "external") private val webClient: WebClient,
+	private val applicationEventPublisher: ApplicationEventPublisher
+) {
+	private val log = LogFactory.getLog(javaClass)
 
 	@GetMapping("/permissions")
 	fun getPermissions(@RequestParam(required = false, defaultValue = "0") page: Int,
@@ -246,6 +268,8 @@ class PermissionController(private val permissionService: PermissionService, @Qu
 	@PostMapping("/permissions")
 	fun createPermission(@RequestBody permissionDto: PermissionDto): ResponseEntity<PermissionDto> {
 		val result = permissionService.createPermission(permissionDto)
+		log.info("sending event: PERMISSION_CREATED_JPA: ${result.id}")
+		applicationEventPublisher.publishEvent(AppEvent("PERMISSION_CREATED_JPA: ${result.id}"))
 		return ResponseEntity.ok(result)
 	}
 
@@ -460,6 +484,83 @@ class WebClientConfig {
 
 }
 
+@Configuration
+@EnableKafka
+class KafkaConfig {
+
+	@Bean
+	fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<String, JsonNode>) =
+		ConcurrentKafkaListenerContainerFactory<String, JsonNode>().also { it.consumerFactory = consumerFactory }
+
+	@Bean
+	fun consumerFactory() = DefaultKafkaConsumerFactory<String, JsonNode>(consumerProps)
+
+	val consumerProps = mapOf(
+		ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
+		ConsumerConfig.GROUP_ID_CONFIG to "sample-group-jvm-jpa",
+		ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+		ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
+		JsonDeserializer.USE_TYPE_INFO_HEADERS to false,
+		JsonDeserializer.TRUSTED_PACKAGES to "*",
+		JsonDeserializer.VALUE_DEFAULT_TYPE to JsonNode::class.java,
+		ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest"
+	)
+
+	@Bean
+	fun producerFactory() = DefaultKafkaProducerFactory<String, KafkaMessage>(senderProps)
+
+	val senderProps = mapOf(
+		ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
+		ProducerConfig.LINGER_MS_CONFIG to 10,
+		ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+		ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java
+	)
+
+	@Bean
+	fun kafkaTemplate(producerFactory: ProducerFactory<String, KafkaMessage>) = KafkaTemplate(producerFactory)
+}
+
+@Controller
+class KafkaListenerController {
+	private val log = LogFactory.getLog(javaClass)
+
+	@KafkaListener(id = "template-mvc-jpa-0", topics = ["\${com.softeno.kafka.rx}"])
+	fun onMessage(payload: JsonNode) {
+		log.info("received payload: $payload")
+		// todo: handle incoming event
+	}
+
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class KafkaMessage(val content: String)
+
+@Service
+class KafkaService(
+	private val kafkaTemplate: KafkaTemplate<String, KafkaMessage>,
+	@Value("\${com.softeno.kafka.tx}") private val topic: String
+) {
+	private val log = LogFactory.getLog(javaClass)
+
+	fun send(message: KafkaMessage) {
+		log.info("sending kafka message: $message")
+		kafkaTemplate.send(topic, message)
+	}
+}
+
+data class AppEvent(val source: String) : ApplicationEvent(source)
+
+@Component
+class SampleApplicationEventPublisher(private val kafkaService: KafkaService) : ApplicationListener<AppEvent> {
+	private val log = LogFactory.getLog(javaClass)
+
+	override fun onApplicationEvent(event: AppEvent) {
+		log.info("received application event: $event")
+		kafkaService.send(event.toKafkaMessage())
+	}
+}
+
+fun AppEvent.toKafkaMessage() = KafkaMessage(content = this.source)
 
 @EnableJpaRepositories
 @EnableTransactionManagement
