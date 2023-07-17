@@ -3,6 +3,7 @@ package com.softeno.template
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.kafka.test.context.EmbeddedKafka
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
@@ -13,6 +14,7 @@ import spock.lang.Specification
         properties = "spring.profiles.active=integration",
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableConfigurationProperties
+@EmbeddedKafka(partitions = 1, brokerProperties = ["listeners=PLAINTEXT://localhost:9092", "port=9092"])
 @ConfigurationPropertiesScan("com.softeno")
 class BaseAppSpec extends Specification {
     @Shared
