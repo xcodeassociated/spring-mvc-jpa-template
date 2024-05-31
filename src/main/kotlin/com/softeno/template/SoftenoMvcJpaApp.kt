@@ -56,7 +56,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.client.*
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.security.oauth2.jwt.*
@@ -453,10 +456,11 @@ class SecurityConfig {
 							   @Value("\${spring.security.oauth2.client.provider.keycloak.jwk-set-uri}") jwkSetUri: String
 	): SecurityFilterChain {
 		return http
-			.cors().configurationSource(corsConfigurationSource()).and()
-			.csrf().disable()
+			.cors { it.configurationSource(corsConfigurationSource()) }
+			.csrf { it.disable() }
 			.authorizeHttpRequests {
-				it.requestMatchers(// monitoring
+				it.requestMatchers(
+					// monitoring
 					"/actuator/**",
 					// springdocs
 					"/swagger-ui.html",
@@ -464,13 +468,14 @@ class SecurityConfig {
 					"/swagger-resources/**",
 					"/swagger-ui/**",
 					"/v3/api-docs/**").permitAll()
-				it.requestMatchers("/permissions/**", "/external/**", "/error/**").hasAuthority("ROLE_ADMIN")
+				it.requestMatchers("/permissions/**", "/external/**", "/error/**")
+					.hasAuthority("ROLE_ADMIN")
 			}
-			.oauth2ResourceServer {
-				it.jwt().decoder(jwtDecoder(issuer, jwkSetUri))
-				it.jwt().jwtAuthenticationConverter {
-						jwt -> AuthenticationConverter().convert(jwt)
-				}
+			.oauth2ResourceServer { rss ->
+				rss.jwt { jwtDecoder(issuer, jwkSetUri) }
+				rss.jwt { it.jwtAuthenticationConverter { jwt ->
+					AuthenticationConverter().convert(jwt)
+				} }
 			}
 			.build()
 	}
@@ -517,7 +522,7 @@ class KafkaConfig {
 	fun consumerFactory() = DefaultKafkaConsumerFactory<String, JsonNode>(consumerProps)
 
 	val consumerProps = mapOf(
-		ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
+		ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9094",
 		ConsumerConfig.GROUP_ID_CONFIG to "sample-group-jvm-jpa",
 		ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
 		ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
@@ -531,7 +536,7 @@ class KafkaConfig {
 	fun producerFactory() = DefaultKafkaProducerFactory<String, KafkaMessage>(senderProps)
 
 	val senderProps = mapOf(
-		ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
+		ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9094",
 		ProducerConfig.LINGER_MS_CONFIG to 10,
 		ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
 		ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java
