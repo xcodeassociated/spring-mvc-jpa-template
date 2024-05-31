@@ -510,6 +510,7 @@ class WebClientConfig {
 
 }
 
+@Profile(value = ["!integration"])
 @Configuration
 @EnableKafka
 class KafkaConfig {
@@ -546,6 +547,7 @@ class KafkaConfig {
 	fun kafkaTemplate(producerFactory: ProducerFactory<String, KafkaMessage>) = KafkaTemplate(producerFactory)
 }
 
+@Profile(value = ["!integration"])
 @Controller
 class KafkaListenerController {
 	private val log = LogFactory.getLog(javaClass)
@@ -561,6 +563,7 @@ class KafkaListenerController {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class KafkaMessage(val content: String)
 
+@Profile(value = ["!integration"])
 @Service
 class KafkaService(
 	private val kafkaTemplate: KafkaTemplate<String, KafkaMessage>,
@@ -576,6 +579,7 @@ class KafkaService(
 
 data class AppEvent(val source: String) : ApplicationEvent(source)
 
+@Profile(value = ["!integration"])
 @Component
 class SampleApplicationEventPublisher(private val kafkaService: KafkaService) : ApplicationListener<AppEvent> {
 	private val log = LogFactory.getLog(javaClass)
