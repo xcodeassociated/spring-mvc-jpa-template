@@ -1,6 +1,5 @@
-package com.softeno.template.config
+package com.softeno.template.sample.http.external.config
 
-import com.softeno.template.ExternalClientConfig
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile

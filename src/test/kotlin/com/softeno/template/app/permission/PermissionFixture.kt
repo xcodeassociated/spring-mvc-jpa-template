@@ -1,7 +1,6 @@
-@file:JvmName("PermissionFixture")
-package com.softeno.template.fixture
+package com.softeno.template.app.permission
 
-import com.softeno.template.PermissionDto
+import com.softeno.template.app.permission.mapper.PermissionDto
 
 class PermissionFixture {
     companion object {

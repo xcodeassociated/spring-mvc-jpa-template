@@ -1,5 +1,6 @@
-package com.softeno.template
+package com.softeno.template.app
 
+import com.softeno.template.SoftenoMvcJpaApp
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest

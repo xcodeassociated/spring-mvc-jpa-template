@@ -1,8 +1,10 @@
-package com.softeno.template
+package com.softeno.template.app.permission.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.softeno.template.fixture.PermissionFixture
+import com.softeno.template.app.BaseAppSpec
+import com.softeno.template.app.permission.PermissionFixture
+import com.softeno.template.app.permission.mapper.PermissionDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpStatus

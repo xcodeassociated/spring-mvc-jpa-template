@@ -62,7 +62,7 @@ dependencies {
 
 	// liquibase
 	implementation ('org.liquibase:liquibase-core:4.29.2') {
-		exclude group: 'javax.xml.bind', module: 'jaxb-api'
+		exclude group: 'javax.xml.bind', module: 'jaxb-receiver'
 		exclude group: 'org.liquibase.ext', module: 'liquibase-hibernate5'
 	}
 	liquibaseRuntime 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'

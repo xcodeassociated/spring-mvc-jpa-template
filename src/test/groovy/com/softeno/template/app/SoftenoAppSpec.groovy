@@ -1,4 +1,4 @@
-package com.softeno.template
+package com.softeno.template.app
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
