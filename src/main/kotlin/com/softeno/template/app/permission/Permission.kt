@@ -3,7 +3,6 @@ package com.softeno.template.app.permission
 import com.softeno.template.app.common.db.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.Table
 import java.util.UUID
 

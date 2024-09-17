@@ -25,7 +25,6 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
-import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
@@ -41,7 +40,6 @@ import org.testcontainers.junit.jupiter.Testcontainers
 )
 @AutoConfigureWebTestClient(timeout = "6000")
 @EnableConfigurationProperties
-@EmbeddedKafka(partitions = 1, brokerProperties = ["listeners=PLAINTEXT://localhost:9092", "port=9092"])
 @ConfigurationPropertiesScan("com.softeno")
 abstract class BaseIntegrationTest {
 

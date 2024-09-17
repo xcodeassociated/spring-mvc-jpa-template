@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id 'org.springframework.boot' version '3.3.1'
+	id 'org.springframework.boot' version '3.3.3'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'org.jetbrains.kotlin.jvm' version '2.0.20'
 	id 'org.jetbrains.kotlin.plugin.spring' version '2.0.20'
@@ -56,13 +56,7 @@ dependencies {
 
 	// testcontainers
 	testImplementation 'org.testcontainers:junit-jupiter'
-	testImplementation 'org.testcontainers:spock'
 	testImplementation 'org.testcontainers:postgresql'
-
-	// spock
-	testImplementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.21', ext: 'pom'
-	testImplementation group: 'org.spockframework', name: 'spock-core', version: '2.4-M4-groovy-4.0'
-	testImplementation group: 'org.spockframework', name: 'spock-spring', version: '2.4-M4-groovy-4.0'
 
 	// guerydsl
 	implementation 'com.querydsl:querydsl-jpa:5.1.0'
@@ -132,11 +126,6 @@ tasks.withType(KotlinCompile) {
 		freeCompilerArgs = ['-Xjsr305=strict']
 		jvmTarget = '17'
 	}
-}
-
-compileTestGroovy {
-	dependsOn tasks.getByPath('compileTestKotlin')
-	classpath += files(compileTestKotlin)
 }
 
 tasks.named('test') {
