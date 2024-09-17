@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="projectName" value="template-service"/>
-    <property name="defaultPattern" value="%d{ISO8601} [${projectName}] %highlight(%-5level) [%blue(%t)] %yellow(%C{1}): %msg%n%throwable"/>
+    <property name="projectName" value="template-service-b"/>
+    <property name="defaultPattern"
+              value="%d{ISO8601} [${projectName}] [%X{traceId:-}] [%X{spanId:-}] %highlight(%-5level) [%blue(%t)] %yellow(%C{1}): %msg%n%throwable"/>
 
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -10,26 +11,90 @@
             </pattern>
         </encoder>
     </appender>
-<!--    root-->
-    <root level="info">
-        <appender-ref ref="Console" />
-    </root>
-<!--    hibernate-->
-    <logger name="org.hibernate" level="trace" additivity="false" >
-        <appender-ref ref="Console" />
-    </logger>
-    <logger name="org.hibernate.type" level="all" additivity="false" >
-        <appender-ref ref="Console" />
-    </logger>
-    <logger name="org.hibernate.SQL" level="all" additivity="false" >
-        <appender-ref ref="Console" />
-    </logger>
-<!--    jdbc-->
-    <logger name="org.springframework.jdbc" level="trace" additivity="false" >
-        <appender-ref ref="Console" />
-    </logger>
-<!--    application-->
-    <logger name="com.softeno" level="trace" additivity="false">
-        <appender-ref ref="Console" />
-    </logger>
+
+    <springProfile name="dev">
+        <root level="info">
+            <appender-ref ref="Console"/>
+        </root>
+        <logger name="com.softeno" level="trace" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name="!dev">
+        <property name="LOGSTASH_HOST" value="${logstash.host:-logstash}" />
+        <property name="LOGSTASH_PORT" value="${logstash.port:-50000}" />
+        <property name="LOGS" value="./logs"/>
+        <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <destination>${LOGSTASH_HOST}:${LOGSTASH_PORT}</destination>
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <mdc/>
+                    <pattern>
+                        <pattern>
+                            {
+                            "application": "${projectName}",
+                            "timestamp": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZZ}",
+                            "logger": "%logger",
+                            "trace": "%X{traceId:-}",
+                            "span": "%X{spanId:-}",
+                            "thread": "%thread",
+                            "level": "%level",
+                            "message": "%message"
+                            }
+                        </pattern>
+                    </pattern>
+                    <stackTrace>
+                        <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                            <maxDepthPerThrowable>2048</maxDepthPerThrowable>
+                            <maxLength>32768</maxLength>
+                            <shortenedClassNameLength>256</shortenedClassNameLength>
+                            <rootCauseFirst>true</rootCauseFirst>
+                        </throwableConverter>
+                    </stackTrace>
+                </providers>
+            </encoder>
+        </appender>
+        <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/spring-boot-logger.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>%d %p %C [%t] %m%n</Pattern>
+            </encoder>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>
+                    ${LOGS}/archived/spring-boot-logger-%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+        </appender>
+        <root level="info">
+            <appender-ref ref="RollingFile"/>
+            <appender-ref ref="Console"/>
+            <appender-ref ref="logstash"/>
+        </root>
+        <logger name="com.softeno" level="trace" additivity="false">
+            <appender-ref ref="RollingFile"/>
+            <appender-ref ref="Console"/>
+            <appender-ref ref="logstash"/>
+        </logger>
+        <!--    hibernate-->
+        <logger name="org.hibernate" level="trace" additivity="false" >
+            <appender-ref ref="Console" />
+        </logger>
+        <logger name="org.hibernate.type" level="all" additivity="false" >
+            <appender-ref ref="Console" />
+        </logger>
+        <logger name="org.hibernate.SQL" level="all" additivity="false" >
+            <appender-ref ref="Console" />
+        </logger>
+        <!--    jdbc-->
+        <logger name="org.springframework.jdbc" level="trace" additivity="false" >
+            <appender-ref ref="Console" />
+        </logger>
+        <!-- -->
+    </springProfile>
+
 </configuration>
