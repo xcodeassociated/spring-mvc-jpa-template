@@ -18,9 +18,11 @@ class ExternalController(
     private val log = LogFactory.getLog(javaClass)
 
     @GetMapping("/{id}")
-    fun getExternalResource(@PathVariable id: String): ResponseEntity<String> {
+    fun getExternalResource(@PathVariable id: String): ResponseEntity<SampleResponseDto> {
         val data = externalServiceClient.fetchExternalResource(id)
         log.info("External: Received $id, sending: ${data.toString()}")
-        return ResponseEntity.ok(data)
+        return ResponseEntity.ok(SampleResponseDto(data = data ?: "null"))
     }
 }
+
+data class SampleResponseDto(val data: String)

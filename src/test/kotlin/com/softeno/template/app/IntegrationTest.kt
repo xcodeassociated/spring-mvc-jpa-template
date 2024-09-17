@@ -186,7 +186,11 @@ class ExternalControllerTest : BaseIntegrationTest(), ExternalApiAbility {
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("data").isEqualTo("1")
+            .jsonPath("data").isEqualTo("""
+                {
+                    "data": "1"
+                }
+            """.trimIndent())
     }
 }
 
