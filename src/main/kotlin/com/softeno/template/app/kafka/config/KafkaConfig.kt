@@ -32,8 +32,6 @@ class KafkaConfig {
     fun consumerFactory() = DefaultKafkaConsumerFactory<String, JsonNode>(consumerProps)
 
     val consumerProps = mapOf(
-        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9094",
-        ConsumerConfig.GROUP_ID_CONFIG to "sample-group-jvm-jpa",
         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
         JsonDeserializer.USE_TYPE_INFO_HEADERS to false,
@@ -46,7 +44,6 @@ class KafkaConfig {
     fun producerFactory() = DefaultKafkaProducerFactory<String, KafkaMessage>(senderProps)
 
     val senderProps = mapOf(
-        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9094",
         ProducerConfig.LINGER_MS_CONFIG to 10,
         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
         ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java
