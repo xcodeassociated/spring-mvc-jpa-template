@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -24,6 +25,12 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 @EnableKafka
 class KafkaConfig {
 
+    @Value("\${spring.kafka.bootstrap-servers}")
+    private lateinit var bootstrapServer: String
+
+    @Value("\${spring.kafka.consumer.group-id}")
+    private lateinit var groupId: String
+
     @Bean
     fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<String, JsonNode>) =
         ConcurrentKafkaListenerContainerFactory<String, JsonNode>().also { it.consumerFactory = consumerFactory }
@@ -32,6 +39,8 @@ class KafkaConfig {
     fun consumerFactory() = DefaultKafkaConsumerFactory<String, JsonNode>(consumerProps)
 
     val consumerProps = mapOf(
+        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServer,
+        ConsumerConfig.GROUP_ID_CONFIG to groupId,
         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
         JsonDeserializer.USE_TYPE_INFO_HEADERS to false,
@@ -44,6 +53,7 @@ class KafkaConfig {
     fun producerFactory() = DefaultKafkaProducerFactory<String, KafkaMessage>(senderProps)
 
     val senderProps = mapOf(
+        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServer,
         ProducerConfig.LINGER_MS_CONFIG to 10,
         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
         ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java
