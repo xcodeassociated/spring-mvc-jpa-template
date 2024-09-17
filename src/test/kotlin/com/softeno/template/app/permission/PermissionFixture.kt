@@ -4,7 +4,6 @@ import com.softeno.template.app.permission.mapper.PermissionDto
 
 class PermissionFixture {
     companion object {
-        @JvmStatic
         fun aPermission(name: String = "some permission", description: String = "some description"): Permission {
             val permission = Permission()
             permission.id = null
@@ -19,8 +18,6 @@ class PermissionFixture {
             return permission
         }
 
-
-        @JvmStatic
         fun aPermissionDto(name: String = "some permission", description: String = "some description") = PermissionDto(name = name, description = description,
             id = null, version = null, createdBy = null, createdDate = null, modifiedBy = null, modifiedDate = null)
     }
