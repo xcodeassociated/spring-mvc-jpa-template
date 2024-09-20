@@ -109,15 +109,16 @@ dependencies {
 	implementation 'io.zipkin.reporter2:zipkin-sender-urlconnection'
 
 }
+
 liquibase {
 	activities {
 		main {
-			changeLogFile "$projectDir/src/main/resources/db/changesets/changelog.yml"
+			changeLogFile "src/main/resources/db/db.changelog.yml"
 			url "jdbc:postgresql://localhost:5432/application"
 			username "admin"
 			password "admin"
 			driver 'org.postgresql.Driver'
-			referenceUrl 'hibernate:spring:com.softeno.template?dialect=org.hibernate.dialect.PostgreSQL95Dialect&hibernate.use_jdbc_metadata_defaults=true&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy'
+			referenceUrl 'hibernate:spring:com.softeno.template?dialect=org.hibernate.dialect.PostgreSQLDialect&hibernate.use_jdbc_metadata_defaults=true&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy'
 			referenceDriver 'liquibase.ext.hibernate.database.connection.HibernateDriver'
 		}
 	}
