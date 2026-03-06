@@ -41,8 +41,6 @@ Authorization: Bearer {{oauthToken}}
 client.global.set("permissionId", null)
  %}
 
-### todo: move
-
 ###
 GET {{host}}/external/{{$random.integer(0, 1000)}}
 Authorization: Bearer {{oauthToken}}

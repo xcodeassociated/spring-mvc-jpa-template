@@ -13,8 +13,8 @@ class WebClientConfig {
 
 
     @Bean(value = ["external"])
-    fun buildWebClient(config: ExternalClientConfig): WebClient {
-        return WebClient.builder()
+    fun buildWebClient(config: ExternalClientConfig, builder: WebClient.Builder): WebClient {
+        return builder
             .baseUrl(config.url)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build()

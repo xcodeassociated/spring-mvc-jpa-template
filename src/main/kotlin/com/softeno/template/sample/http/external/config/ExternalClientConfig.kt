@@ -30,10 +30,10 @@ class WebClientConfig {
     }
 
     @Bean(value = ["external"])
-    fun webClient(authorizedClientManager: OAuth2AuthorizedClientManager, config: ExternalClientConfig): WebClient {
+    fun webClient(authorizedClientManager: OAuth2AuthorizedClientManager, config: ExternalClientConfig, builder: WebClient.Builder): WebClient {
         val oauth2 = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
         oauth2.setDefaultClientRegistrationId("keycloak")
-        return WebClient.builder()
+        return builder
             .filter(oauth2)
             .baseUrl(config.url)
             .build()

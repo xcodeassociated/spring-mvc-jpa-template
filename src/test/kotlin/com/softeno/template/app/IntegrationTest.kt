@@ -19,18 +19,23 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.kafka.KafkaContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
+import org.testcontainers.utility.DockerImageName
 
 @Testcontainers
 @SpringBootTest(
@@ -41,6 +46,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @AutoConfigureWebTestClient(timeout = "6000")
 @EnableConfigurationProperties
 @ConfigurationPropertiesScan("com.softeno")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 abstract class BaseIntegrationTest {
 
     @Autowired
@@ -49,11 +55,51 @@ abstract class BaseIntegrationTest {
     @Autowired
     lateinit var webTestClient: WebTestClient
 
-    @Container
-    var postgreSQLContainer = PostgreSQLContainer("postgres:15.2-alpine")
-        .withDatabaseName("application")
-        .withUsername("admin")
-        .withPassword("admin")
+    companion object {
+        @Container
+        var kafka: KafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.0"))
+            .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
+            .withEnv("ALLOW_PLAINTEXT_LISTENER", "true")
+            .withEnv("KAFKA_CREATE_TOPICS", "sample_topic_2" + ":1:1")
+
+        @Container
+        var postgreSQLContainer = PostgreSQLContainer(DockerImageName.parse("postgres:16-alpine"))
+            .withDatabaseName("application")
+            .withUsername("admin")
+            .withPassword("admin")
+
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun registerDynamicProperties(registry: DynamicPropertyRegistry) {
+            kafka.start()
+            registry.add("spring.kafka.bootstrap-servers") {
+                kafka.bootstrapServers
+            }
+
+            postgreSQLContainer.start()
+            registry.add("spring.liquibase.url") {
+                "jdbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.firstMappedPort}/${postgreSQLContainer.databaseName}"
+            }
+            registry.add("spring.liquibase.user") {
+                postgreSQLContainer.username
+            }
+            registry.add("spring.liquibase.password") {
+                postgreSQLContainer.password
+            }
+
+            registry.add("spring.datasource.url") {
+                "jdbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.firstMappedPort}/${postgreSQLContainer.databaseName}"
+            }
+            registry.add("spring.datasource.username") {
+                postgreSQLContainer.username
+            }
+            registry.add("spring.datasource.password") {
+                postgreSQLContainer.password
+            }
+        }
+
+    }
 
 
     @BeforeEach

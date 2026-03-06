@@ -43,3 +43,5 @@ logs/
 volumes/
 
 http-client.env.json
+
+.kotlin/
