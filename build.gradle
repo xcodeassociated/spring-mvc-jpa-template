@@ -65,7 +65,6 @@ dependencies {
 	implementation "org.jetbrains.kotlin:kotlin-reflect"
 	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j"
 
-
 	// test utils
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation "org.springframework.boot:spring-boot-starter-test"
@@ -79,7 +78,6 @@ dependencies {
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 	testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test'
 	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
-//	testImplementation 'io.projectreactor:reactor-test'
 
 	// wiremock
 	testImplementation "org.wiremock:wiremock-standalone:${wiremockVersion}"
@@ -142,8 +140,6 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-starter-opentelemetry"
 	testImplementation "org.springframework.boot:spring-boot-starter-opentelemetry-test"
 	implementation "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:${logbackAppenderVersion}"
-	implementation "io.micrometer:micrometer-tracing-bridge-otel"
-	implementation "io.micrometer:context-propagation"
 }
 
 liquibase {
