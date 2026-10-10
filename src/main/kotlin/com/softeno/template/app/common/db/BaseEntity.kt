@@ -19,15 +19,10 @@ import java.util.UUID
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
 @OptimisticLocking(type = OptimisticLockType.VERSION)
-open class BaseEntity {
-
-	constructor(uuid: UUID) {
-		this.uuid = uuid
-	}
-
+open class BaseEntity(
 	@Column(updatable = false)
-	var uuid: UUID
-
+	var uuid: UUID = UUID.randomUUID()
+) {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	var id: Long? = null
