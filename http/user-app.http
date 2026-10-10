@@ -34,6 +34,13 @@ Authorization: Bearer {{oauthToken}}
 {"name": "test-coroutine-changed", "description": "test description coroutine changed via jpql!", "version": 0}
 
 ###
+PUT {{host}}/permissions/{{permissionId}}/em
+Content-Type: application/json
+Authorization: Bearer {{oauthToken}}
+
+{"name": "test-coroutine-changed", "description": "test description coroutine changed via jpql!", "version": 0}
+
+###
 DELETE {{host}}/permissions/{{permissionId}}
 Authorization: Bearer {{oauthToken}}
 

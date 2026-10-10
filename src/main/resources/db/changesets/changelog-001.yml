@@ -1,14 +1,6 @@
 databaseChangeLog:
 - changeSet:
-    id: 1677951974555-1
-    author: xcodeassociated (generated)
-    changes:
-    - createSequence:
-        incrementBy: 50
-        sequenceName: permissions_seq
-        startValue: 1
-- changeSet:
-    id: 1677951974555-2
+    id: 1791626690569-1
     author: xcodeassociated (generated)
     changes:
     - createTable:
@@ -22,13 +14,9 @@ databaseChangeLog:
             name: id
             type: BIGINT
         - column:
-            constraints:
-              nullable: false
             name: created_by
             type: VARCHAR(255)
         - column:
-            constraints:
-              nullable: false
             name: created_date
             type: BIGINT
         - column:
@@ -55,11 +43,23 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: permissions
 - changeSet:
-    id: 1677951974555-3
+    id: 1791626690569-2
     author: xcodeassociated (generated)
     changes:
     - addUniqueConstraint:
         columnNames: name
-        constraintName: UC_PERMISSIONSNAME_COL
+        constraintName: uc_permissionsname_col
         tableName: permissions
-
+- changeSet:
+    id: 1791626690569-3
+    author: xcodeassociated (generated)
+    changes:
+    - createSequence:
+        cacheSize: 1
+        cycle: false
+        dataType: bigint
+        incrementBy: 50
+        maxValue: 9223372036854775807
+        minValue: 1
+        sequenceName: permissions_seq
+        startValue: 1

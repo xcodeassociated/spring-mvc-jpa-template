@@ -58,7 +58,13 @@ class PermissionController(
 
     @PutMapping("/permissions/{id}/jpql")
     fun updatePermissionJpql(@PathVariable id: Long, @RequestBody permissionDto: PermissionDto): ResponseEntity<PermissionDto> {
-        val result = permissionService.updatePermissionJpql(id, permissionDto)
+        val result = permissionService.updatePermissionViaJpql(id, permissionDto)
+        return ResponseEntity.ok(result)
+    }
+
+    @PutMapping("/permissions/{id}/em")
+    fun updatePermissionEm(@PathVariable id: Long, @RequestBody permissionDto: PermissionDto): ResponseEntity<PermissionDto> {
+        val result = permissionService.updatePermissionViaEntityManager(id, permissionDto)
         return ResponseEntity.ok(result)
     }
 
