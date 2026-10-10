@@ -8,12 +8,11 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.querydsl.QuerydslPredicateExecutor
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
-interface PermissionRepository : JpaRepository<Permission, Long>, QuerydslPredicateExecutor<Permission> {
+interface PermissionRepository : JpaRepository<Permission, Long> {
     override fun findAll(pageable: Pageable): Page<Permission>
 
     @Modifying
